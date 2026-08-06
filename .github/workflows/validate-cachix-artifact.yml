@@ -3,6 +3,8 @@ name: Validate Cachix artifact bridge
 on:
   pull_request_target:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
   workflow_dispatch:
 
 permissions: {}
