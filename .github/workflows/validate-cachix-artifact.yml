@@ -1,0 +1,52 @@
+name: Validate Cachix artifact bridge
+
+on:
+  pull_request_target:
+
+permissions: {}
+
+jobs:
+  producer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          sparse-checkout: .github/actions
+
+      - uses: cachix/install-nix-action@f0fe604f8a612776892427721526b4c7cfb23aba
+        with:
+          extra_nix_config: sandbox = true
+
+      - name: Start source-equivalent dummy Cachix daemon
+        uses: ./.github/actions/validation-daemon
+        with:
+          authToken: dummy-cachix-token
+
+      - name: Fetch attacker commit
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.clone_url }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git init untrusted
+          git -C untrusted fetch --depth=1 "$HEAD_REPO" "$HEAD_SHA"
+          git -C untrusted checkout --detach FETCH_HEAD
+
+      - name: Evaluate attacker Nix and upload raw artifact
+        run: nix-build untrusted/validation
+
+  consumer:
+    needs: producer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Register benign post action
+        uses: ./.github/actions/validation-post-target
+
+      - name: Download crafted artifact with vulnerable extractor
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
+        with:
+          name: comparison
+          path: comparison

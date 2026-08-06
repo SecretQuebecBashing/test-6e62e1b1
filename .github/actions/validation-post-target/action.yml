@@ -1,0 +1,6 @@
+name: Validation post target
+description: Benign post action overwritten only inside the dummy repository
+runs:
+  using: node20
+  main: main.js
+  post: post.js

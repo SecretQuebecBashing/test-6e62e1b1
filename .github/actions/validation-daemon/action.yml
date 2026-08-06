@@ -1,0 +1,9 @@
+name: Validation daemon
+description: Dummy source-equivalent persistent process for authorized validation
+inputs:
+  authToken:
+    required: true
+    description: Harmless dummy condition value
+runs:
+  using: node20
+  main: index.js
