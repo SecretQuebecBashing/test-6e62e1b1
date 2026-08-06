@@ -17,7 +17,7 @@ jobs:
         with:
           sparse-checkout: .github/actions
 
-      - uses: cachix/install-nix-action@f0fe604f8a612776892427721526b4c7cfb23aba
+      - uses: cachix/install-nix-action@630ae543ea3a38a9a4166f03376c02c50f408342
         with:
           extra_nix_config: sandbox = true
 
